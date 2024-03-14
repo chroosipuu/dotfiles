@@ -14,6 +14,10 @@ vim.opt.wrap = false
 
 vim.opt.scrolloff = 8
 
+vim.opt.ignorecase = true
+vim.opt.smartcase = true
+
+
 -- plugins
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
@@ -37,6 +41,7 @@ local plugins = {
         'nvim-lualine/lualine.nvim',
         dependencies = { 'nvim-tree/nvim-web-devicons' }
     },
+    -- Navigation
     {
         'nvim-telescope/telescope.nvim', tag = '0.1.5',
         dependencies = { 'nvim-lua/plenary.nvim' }
@@ -46,7 +51,6 @@ local plugins = {
         branch = "harpoon2",
         dependencies = { "nvim-lua/plenary.nvim" }
     },
-    {'nvim-treesitter/nvim-treesitter', build = ':TSUpdate'},
     {
         "christoomey/vim-tmux-navigator",
         cmd = {
@@ -64,12 +68,14 @@ local plugins = {
             { "<c-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>" },
         },
     },
+    -- GIT
     {
         'tpope/vim-fugitive'
     },
     {
         'lewis6991/gitsigns.nvim'
     },
+    -- LSP Support
     {'williamboman/mason.nvim'},
     {'williamboman/mason-lspconfig.nvim'},
     {
@@ -78,13 +84,13 @@ local plugins = {
         lazy = true,
         config = false,
     },
-    -- LSP Support
     {
         'neovim/nvim-lspconfig',
         dependencies = {
             {'hrsh7th/cmp-nvim-lsp'},
         }
     },
+    {'nvim-treesitter/nvim-treesitter', build = ':TSUpdate'},
     -- Autocompletion
     {
         'hrsh7th/nvim-cmp',
@@ -92,6 +98,14 @@ local plugins = {
             {'L3MON4D3/LuaSnip'}
         },
     },
+    { "zbirenbaum/copilot.lua",  cmd = "Copilot", event = "InsertEnter" },
+    {
+        "zbirenbaum/copilot-cmp",
+        config = function()
+            require("copilot_cmp").setup()
+        end,
+    },
+    -- QoL
     {
         "kylechui/nvim-surround",
         version = "*", -- Use for stability; omit to use `main` branch for the latest features
@@ -106,7 +120,15 @@ local plugins = {
         "folke/todo-comments.nvim",
         dependencies = { "nvim-lua/plenary.nvim" },
         opts = {}
-    }
+    },
+    {
+        "numToStr/Comment.nvim",
+        opts = {
+            -- add any options here
+        },
+        lazy = false,
+    },
+    { "lukas-reineke/indent-blankline.nvim", main = "ibl", opts = {} }
 }
 local opts = {}
 require("lazy").setup(plugins, opts)
@@ -198,6 +220,8 @@ require('gitsigns').setup{
     end
 }
 
+require('Comment').setup()
+
 local configs = require("nvim-treesitter.configs")
 configs.setup({
     ensure_installed = { "lua", "javascript", "html", "php", "python" },
@@ -237,5 +261,14 @@ cmp.setup({
         -- Scroll up and down in the completion documentation
         ['<C-u>'] = cmp.mapping.scroll_docs(-4),
         ['<C-d>'] = cmp.mapping.scroll_docs(4),
-    })
+    }),
+    sources={
+        { name = "copilot", group_index = 2 },
+    },
+})
+
+
+require("copilot").setup({
+    suggestion = { enabled = false },
+    panel = { enabled = false },
 })
