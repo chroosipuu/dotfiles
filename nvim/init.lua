@@ -17,6 +17,12 @@ vim.opt.scrolloff = 8
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
 
+vim.cmd[[
+augroup highlight_yank
+autocmd!
+au TextYankPost * silent! lua vim.highlight.on_yank({higroup="Visual", timeout=250})
+augroup END
+]]
 
 -- plugins
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
