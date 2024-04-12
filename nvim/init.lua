@@ -150,19 +150,9 @@ require('lualine').setup{
 
 local harpoon = require("harpoon")
 harpoon:setup()
-vim.keymap.set("n", "<leader>a", function() harpoon:list():append() end)
-
--- Toggle previous & next buffers stored within Harpoon list
-vim.keymap.set("n", "<leader><", function() harpoon:list():prev() end)
-vim.keymap.set("n", "<leader>>", function() harpoon:list():next() end)
-
-
-local builtin = require('telescope.builtin')
-vim.keymap.set('n', '<C-p>', builtin.git_files, {})
-vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
-vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
-vim.keymap.set('n', '<leader>fh', builtin.help_tags, {})
-
+vim.keymap.set("n", "<leader>a", function() harpoon:list():add() end)
+vim.keymap.set("n", "<leader>d", function() harpoon:list():remove() end)
+-- basic telescope configuration
 local conf = require("telescope.config").values
 local function toggle_telescope(harpoon_files)
     local file_paths = {}
@@ -182,6 +172,13 @@ end
 
 vim.keymap.set("n", "<C-e>", function() toggle_telescope(harpoon:list()) end,
     { desc = "Open harpoon window" })
+
+require("telescope").load_extension('harpoon')
+local builtin = require('telescope.builtin')
+vim.keymap.set('n', '<C-p>', builtin.git_files, {})
+vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
+vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
+vim.keymap.set('n', '<leader>fh', builtin.help_tags, {})
 
 require('gitsigns').setup{
     on_attach = function(bufnr)
