@@ -1,4 +1,4 @@
-vim.g.mapleader = " "
+require("chroosipuu.remaps")
 
 -- opt
 vim.opt.relativenumber = true
@@ -82,28 +82,32 @@ local plugins = {
         'lewis6991/gitsigns.nvim'
     },
     -- LSP Support
-    {'williamboman/mason.nvim'},
-    {'williamboman/mason-lspconfig.nvim'},
     {
         'VonHeikemen/lsp-zero.nvim',
         branch = 'v3.x',
         lazy = true,
         config = false,
-    },
-    {
-        'neovim/nvim-lspconfig',
         dependencies = {
-            {'hrsh7th/cmp-nvim-lsp'},
+            -- LSP Support
+            {'neovim/nvim-lspconfig'},
+            {'williamboman/mason.nvim'},
+            {'williamboman/mason-lspconfig.nvim'},
+
+            -- Autocompletion
+            {'hrsh7th/nvim-cmp'},         -- Required
+            {'hrsh7th/cmp-nvim-lsp'},     -- Required
+            {'hrsh7th/cmp-buffer'},       -- Optional
+            {'hrsh7th/cmp-path'},         -- Optional
+            {'saadparwaiz1/cmp_luasnip'}, -- Optional
+            {'hrsh7th/cmp-nvim-lua'},     -- Optional
+
+            -- Snippets
+            {'L3MON4D3/LuaSnip'},             -- Required
+            {'rafamadriz/friendly-snippets'}, -- Optional
         }
     },
     {'nvim-treesitter/nvim-treesitter', build = ':TSUpdate'},
     -- Autocompletion
-    {
-        'hrsh7th/nvim-cmp',
-        dependencies = {
-            {'L3MON4D3/LuaSnip'}
-        },
-    },
     { "zbirenbaum/copilot.lua",  cmd = "Copilot", event = "InsertEnter" },
     {
         "zbirenbaum/copilot-cmp",
@@ -150,23 +154,36 @@ require('lualine').setup{
 
 local harpoon = require("harpoon")
 harpoon:setup()
-vim.keymap.set("n", "<leader>a", function() harpoon:list():add() end)
+vim.keymap.set("n", "<leader>a", function() harpoon:list():append() end)
 vim.keymap.set("n", "<leader>d", function() harpoon:list():remove() end)
 -- basic telescope configuration
-local conf = require("telescope.config").values
+local telescope_conf = require("telescope.config").values
 local function toggle_telescope(harpoon_files)
-    local file_paths = {}
+    local paths = {}
     for _, item in ipairs(harpoon_files.items) do
-        table.insert(file_paths, item.value)
+        table.insert(paths, item.value)
     end
 
     require("telescope.pickers").new({}, {
         prompt_title = "Harpoon",
         finder = require("telescope.finders").new_table({
-            results = file_paths,
+            results = paths
         }),
-        previewer = conf.file_previewer({}),
-        sorter = conf.generic_sorter({}),
+        previewer = telescope_conf.file_previewer({}),
+        sorter = telescope_conf.generic_sorter({}),
+        attach_mappings = function(prompt_buffer_number, map)
+            map( "n", "d", -- your mapping here
+                function()
+                    local state = require("telescope.actions.state")
+                    local selected_entry = state.get_selected_entry()
+                    local current_picker = state.get_current_picker(prompt_buffer_number)
+
+                    harpoon:list():removeAt(selected_entry.index)
+                    -- current_picker:refresh(make_finder(harpoon_files))
+                end
+            )
+            return true
+        end
     }):find()
 end
 
@@ -254,8 +271,7 @@ cmp.setup({
         -- `Enter` key to confirm completion
         ['<CR>'] = cmp.mapping.confirm({select = false}),
 
-        -- Ctrl+Space to trigger completion menu
-        ['<C-Space>'] = cmp.mapping.complete(),
+        ['<leader>q'] = cmp.mapping.complete(),
 
         -- Navigate between snippet placeholder
         ['<C-f>'] = cmp_action.luasnip_jump_forward(),
@@ -265,9 +281,16 @@ cmp.setup({
         ['<C-u>'] = cmp.mapping.scroll_docs(-4),
         ['<C-d>'] = cmp.mapping.scroll_docs(4),
     }),
-    sources={
+    sources = {
         { name = "copilot", group_index = 2 },
+        { name = "nvim_lsp" },
+        { name = "buffer" },
     },
+    snippet = {
+    expand = function(args)
+      require('luasnip').lsp_expand(args.body)
+    end,
+  },
 })
 
 
