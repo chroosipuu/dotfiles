@@ -1,5 +1,5 @@
-require("chroosipuu.remaps")
-
+-- remap
+vim.g.mapleader = " "
 -- opt
 vim.opt.relativenumber = true
 
