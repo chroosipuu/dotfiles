@@ -159,27 +159,30 @@ vim.keymap.set("n", "<leader>d", function() harpoon:list():remove() end)
 -- basic telescope configuration
 local telescope_conf = require("telescope.config").values
 local function toggle_telescope(harpoon_files)
-    local paths = {}
-    for _, item in ipairs(harpoon_files.items) do
-        table.insert(paths, item.value)
+    local function make_finder()
+        local paths = {}
+        for _, item in ipairs(harpoon_files.items) do
+            table.insert(paths, item.value)
+        end
+        return require("telescope.finders").new_table({
+            results = paths
+        })
     end
 
     require("telescope.pickers").new({}, {
         prompt_title = "Harpoon",
-        finder = require("telescope.finders").new_table({
-            results = paths
-        }),
+        finder = make_finder(),
         previewer = telescope_conf.file_previewer({}),
         sorter = telescope_conf.generic_sorter({}),
         attach_mappings = function(prompt_buffer_number, map)
-            map( "n", "d", -- your mapping here
+            map( "n", "d",
                 function()
                     local state = require("telescope.actions.state")
                     local selected_entry = state.get_selected_entry()
                     local current_picker = state.get_current_picker(prompt_buffer_number)
 
                     harpoon:list():removeAt(selected_entry.index)
-                    -- current_picker:refresh(make_finder(harpoon_files))
+                    current_picker:refresh(make_finder())
                 end
             )
             return true
