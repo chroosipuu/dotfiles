@@ -1,5 +1,8 @@
 -- remap
 vim.g.mapleader = " "
+vim.keymap.set('n', '<C-s>', ':w<CR>')
+vim.keymap.set("n", "<C-d>", "<C-d>zz")
+vim.keymap.set("n", "<C-u>", "<C-u>zz")
 -- opt
 vim.opt.relativenumber = true
 
