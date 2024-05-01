@@ -3,6 +3,9 @@ vim.g.mapleader = " "
 vim.keymap.set('n', '<C-s>', ':w<CR>')
 vim.keymap.set("n", "<C-d>", "<C-d>zz")
 vim.keymap.set("n", "<C-u>", "<C-u>zz")
+vim.keymap.set("n", "<leader>e", ":Ex<CR>")
+vim.keymap.set("n", "<Esc>", "<Esc>:noh<CR>")
+
 -- opt
 vim.opt.relativenumber = true
 
@@ -274,10 +277,9 @@ local cmp_action = lsp_zero.cmp_action()
 
 cmp.setup({
     mapping = cmp.mapping.preset.insert({
+        -- Cannot have leader here while leader is <space>
         -- `Enter` key to confirm completion
         ['<CR>'] = cmp.mapping.confirm({select = false}),
-
-        ['<leader>q'] = cmp.mapping.complete(),
 
         -- Navigate between snippet placeholder
         ['<C-f>'] = cmp_action.luasnip_jump_forward(),
