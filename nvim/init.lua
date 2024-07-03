@@ -23,7 +23,10 @@ vim.opt.scrolloff = 8
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
 
-vim.cmd[[
+vim.opt.spelllang = 'en_us'
+vim.opt.spell = true
+
+vim.cmd [[
 augroup highlight_yank
 autocmd!
 au TextYankPost * silent! lua vim.highlight.on_yank({higroup="Visual", timeout=250})
@@ -55,7 +58,8 @@ local plugins = {
     },
     -- Navigation
     {
-        'nvim-telescope/telescope.nvim', tag = '0.1.5',
+        'nvim-telescope/telescope.nvim',
+        tag = '0.1.5',
         dependencies = { 'nvim-lua/plenary.nvim' }
     },
     {
@@ -73,10 +77,10 @@ local plugins = {
             "TmuxNavigatePrevious",
         },
         keys = {
-            { "<c-h>", "<cmd><C-U>TmuxNavigateLeft<cr>" },
-            { "<c-j>", "<cmd><C-U>TmuxNavigateDown<cr>" },
-            { "<c-k>", "<cmd><C-U>TmuxNavigateUp<cr>" },
-            { "<c-l>", "<cmd><C-U>TmuxNavigateRight<cr>" },
+            { "<c-h>",  "<cmd><C-U>TmuxNavigateLeft<cr>" },
+            { "<c-j>",  "<cmd><C-U>TmuxNavigateDown<cr>" },
+            { "<c-k>",  "<cmd><C-U>TmuxNavigateUp<cr>" },
+            { "<c-l>",  "<cmd><C-U>TmuxNavigateRight<cr>" },
             { "<c-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>" },
         },
     },
@@ -95,26 +99,26 @@ local plugins = {
         config = false,
         dependencies = {
             -- LSP Support
-            {'neovim/nvim-lspconfig'},
-            {'williamboman/mason.nvim'},
-            {'williamboman/mason-lspconfig.nvim'},
+            { 'neovim/nvim-lspconfig' },
+            { 'williamboman/mason.nvim' },
+            { 'williamboman/mason-lspconfig.nvim' },
 
             -- Autocompletion
-            {'hrsh7th/nvim-cmp'},         -- Required
-            {'hrsh7th/cmp-nvim-lsp'},     -- Required
-            {'hrsh7th/cmp-buffer'},       -- Optional
-            {'hrsh7th/cmp-path'},         -- Optional
-            {'saadparwaiz1/cmp_luasnip'}, -- Optional
-            {'hrsh7th/cmp-nvim-lua'},     -- Optional
+            { 'hrsh7th/nvim-cmp' },       -- Required
+            { 'hrsh7th/cmp-nvim-lsp' },   -- Required
+            { 'hrsh7th/cmp-buffer' },     -- Optional
+            { 'hrsh7th/cmp-path' },       -- Optional
+            { 'saadparwaiz1/cmp_luasnip' }, -- Optional
+            { 'hrsh7th/cmp-nvim-lua' },   -- Optional
 
             -- Snippets
-            {'L3MON4D3/LuaSnip'},             -- Required
-            {'rafamadriz/friendly-snippets'}, -- Optional
+            { 'L3MON4D3/LuaSnip' },           -- Required
+            { 'rafamadriz/friendly-snippets' }, -- Optional
         }
     },
-    {'nvim-treesitter/nvim-treesitter', build = ':TSUpdate'},
+    { 'nvim-treesitter/nvim-treesitter', build = ':TSUpdate' },
     -- Autocompletion
-    { "zbirenbaum/copilot.lua",  cmd = "Copilot", event = "InsertEnter" },
+    { "zbirenbaum/copilot.lua",          cmd = "Copilot",    event = "InsertEnter" },
     {
         "zbirenbaum/copilot-cmp",
         config = function()
@@ -144,7 +148,15 @@ local plugins = {
         },
         lazy = false,
     },
-    { "lukas-reineke/indent-blankline.nvim", main = "ibl", opts = {} }
+    { "lukas-reineke/indent-blankline.nvim", main = "ibl", opts = {} },
+    {
+        'windwp/nvim-autopairs',
+        event = "InsertEnter",
+        config = true
+    },
+    {
+        'windwp/nvim-ts-autotag',
+    }
 }
 local opts = {}
 require("lazy").setup(plugins, opts)
@@ -153,9 +165,9 @@ vim.cmd("colorscheme onedark")
 
 local custom_lualine_onedark = require('lualine.themes.onedark')
 custom_lualine_onedark.normal.c.bg = '#272C34'
-require('lualine').setup{
-    options = { theme  = custom_lualine_onedark, icons_enabled = false},
-    sections = {lualine_x = {'filetype'}},
+require('lualine').setup {
+    options = { theme = custom_lualine_onedark, icons_enabled = false },
+    sections = { lualine_x = { 'filetype' } },
 }
 
 local harpoon = require("harpoon")
@@ -181,7 +193,7 @@ local function toggle_telescope(harpoon_files)
         previewer = telescope_conf.file_previewer({}),
         sorter = telescope_conf.generic_sorter({}),
         attach_mappings = function(prompt_buffer_number, map)
-            map( "n", "d",
+            map("n", "d",
                 function()
                     local state = require("telescope.actions.state")
                     local selected_entry = state.get_selected_entry()
@@ -201,12 +213,13 @@ vim.keymap.set("n", "<C-e>", function() toggle_telescope(harpoon:list()) end,
 
 require("telescope").load_extension('harpoon')
 local builtin = require('telescope.builtin')
-vim.keymap.set('n', '<C-p>', builtin.git_files, {})
+vim.keymap.set('n', '<C-p>', builtin.find_files, {})
 vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
+vim.keymap.set('n', '<leader>fc', builtin.current_buffer_fuzzy_find, {})
 vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
 vim.keymap.set('n', '<leader>fh', builtin.help_tags, {})
 
-require('gitsigns').setup{
+require('gitsigns').setup {
     on_attach = function(bufnr)
         local gs = package.loaded.gitsigns
 
@@ -221,35 +234,37 @@ require('gitsigns').setup{
             if vim.wo.diff then return ']c' end
             vim.schedule(function() gs.next_hunk() end)
             return '<Ignore>'
-        end, {expr=true})
+        end, { expr = true })
 
         map('n', '[c', function()
             if vim.wo.diff then return '[c' end
             vim.schedule(function() gs.prev_hunk() end)
             return '<Ignore>'
-        end, {expr=true})
+        end, { expr = true })
 
         -- Actions
         map('n', '<leader>hs', gs.stage_hunk)
         map('n', '<leader>hr', gs.reset_hunk)
-        map('v', '<leader>hs', function() gs.stage_hunk {vim.fn.line('.'), vim.fn.line('v')} end)
-        map('v', '<leader>hr', function() gs.reset_hunk {vim.fn.line('.'), vim.fn.line('v')} end)
+        map('v', '<leader>hs', function() gs.stage_hunk { vim.fn.line('.'), vim.fn.line('v') } end)
+        map('v', '<leader>hr', function() gs.reset_hunk { vim.fn.line('.'), vim.fn.line('v') } end)
         map('n', '<leader>hS', gs.stage_buffer)
         map('n', '<leader>hu', gs.undo_stage_hunk)
         map('n', '<leader>hR', gs.reset_buffer)
         map('n', '<leader>hp', gs.preview_hunk)
-        map('n', '<leader>hb', function() gs.blame_line{full=true} end)
+        map('n', '<leader>hb', function() gs.blame_line { full = true } end)
         map('n', '<leader>tb', gs.toggle_current_line_blame)
         map('n', '<leader>hd', gs.diffthis)
         map('n', '<leader>hD', function() gs.diffthis('~') end)
         map('n', '<leader>td', gs.toggle_deleted)
 
         -- Text object
-        map({'o', 'x'}, 'ih', ':<C-U>Gitsigns select_hunk<CR>')
+        map({ 'o', 'x' }, 'ih', ':<C-U>Gitsigns select_hunk<CR>')
     end
 }
 
 require('Comment').setup()
+
+require('nvim-ts-autotag').setup()
 
 local configs = require("nvim-treesitter.configs")
 configs.setup({
@@ -261,12 +276,12 @@ configs.setup({
 
 local lsp_zero = require('lsp-zero')
 lsp_zero.on_attach(function(client, bufnr)
-    lsp_zero.default_keymaps({buffer = bufnr})
+    lsp_zero.default_keymaps({ buffer = bufnr })
 end)
 
 require('mason').setup({})
 require('mason-lspconfig').setup({
-    ensure_installed = {'rust_analyzer', 'ruff_lsp'},
+    ensure_installed = { 'rust_analyzer', 'ruff_lsp' },
     handlers = {
         lsp_zero.default_setup,
     },
@@ -279,7 +294,7 @@ cmp.setup({
     mapping = cmp.mapping.preset.insert({
         -- Cannot have leader here while leader is <space>
         -- `Enter` key to confirm completion
-        ['<CR>'] = cmp.mapping.confirm({select = false}),
+        ['<CR>'] = cmp.mapping.confirm({ select = false }),
 
         -- Navigate between snippet placeholder
         ['<C-f>'] = cmp_action.luasnip_jump_forward(),
@@ -295,10 +310,10 @@ cmp.setup({
         { name = "buffer" },
     },
     snippet = {
-    expand = function(args)
-      require('luasnip').lsp_expand(args.body)
-    end,
-  },
+        expand = function(args)
+            require('luasnip').lsp_expand(args.body)
+        end,
+    },
 })
 
 
