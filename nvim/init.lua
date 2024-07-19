@@ -3,7 +3,7 @@ vim.g.mapleader = " "
 vim.keymap.set('n', '<C-s>', ':w<CR>')
 vim.keymap.set("n", "<C-d>", "<C-d>zz")
 vim.keymap.set("n", "<C-u>", "<C-u>zz")
-vim.keymap.set("n", "<leader>e", ":Ex<CR>")
+vim.keymap.set("n", "<C-e>", ":Ex<CR>")
 vim.keymap.set("n", "<Esc>", "<Esc>:noh<CR>")
 
 -- opt
@@ -156,7 +156,24 @@ local plugins = {
     },
     {
         'windwp/nvim-ts-autotag',
+    },
+    {
+      'stevearc/oil.nvim',
+      opts = {},
+      -- Optional dependencies
+      dependencies = { { "nvim-tree/nvim-web-devicons", opts = {} } },
+    },
+    {
+    "nvim-neo-tree/neo-tree.nvim",
+    branch = "v3.x",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "nvim-tree/nvim-web-devicons",
+      "MunifTanjim/nui.nvim",
+      "3rd/image.nvim", -- Optional image support in preview window: See `# Preview Mode` for more information
     }
+}
+
 }
 local opts = {}
 require("lazy").setup(plugins, opts)
@@ -172,8 +189,6 @@ require('lualine').setup {
 
 local harpoon = require("harpoon")
 harpoon:setup()
-vim.keymap.set("n", "<leader>a", function() harpoon:list():append() end)
-vim.keymap.set("n", "<leader>d", function() harpoon:list():remove() end)
 -- basic telescope configuration
 local telescope_conf = require("telescope.config").values
 local function toggle_telescope(harpoon_files)
@@ -208,7 +223,9 @@ local function toggle_telescope(harpoon_files)
     }):find()
 end
 
-vim.keymap.set("n", "<C-e>", function() toggle_telescope(harpoon:list()) end,
+vim.keymap.set("n", "<leader>ea", function() harpoon:list():append() end)
+vim.keymap.set("n", "<leader>ed", function() harpoon:list():remove() end)
+vim.keymap.set("n", "<leader>ee", function() toggle_telescope(harpoon:list()) end,
     { desc = "Open harpoon window" })
 
 require("telescope").load_extension('harpoon')
@@ -316,6 +333,8 @@ cmp.setup({
     },
 })
 
+require("oil").setup()
+vim.keymap.set("n", "-", "<CMD>Oil<CR>", { desc = "Open parent directory" })
 
 require("copilot").setup({
     suggestion = { enabled = false },
